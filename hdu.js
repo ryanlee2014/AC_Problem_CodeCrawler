@@ -39,9 +39,9 @@ function hduAccountMaker(user_id, password) {
 
 const hduAgent = agent();
 
-async function main(argc, argv) {
-    console.log("Source code crawler for HDU");
-    let user_id, password;
+async function getUserAndPass() {
+    let user_id,password;
+    user_id = password = "";
     await new Promise((resolve, reject) => {
         rl.question("UserID:", (answer => {
             resolve(answer);
@@ -68,8 +68,23 @@ async function main(argc, argv) {
             console.log(reject);
             process.exit(1);
         });
+    return [user_id,password];
+}
 
+function validConfigUserAccount() {
+    return config.hdu.username && config.hdu.username.length > 1 && config.hdu.userpass && config.hdu.userpass.length >= 6;
+}
 
+async function main(argc, argv) {
+    console.log("Source code crawler for HDU");
+    let user_id,password;
+    if(!validConfigUserAccount()) {
+        [user_id,password] = getUserAndPass();
+    }
+    else {
+        user_id = config.hdu.username;
+        password = config.hdu.userpass;
+    }
     await new Promise((resolve, reject) => {
         hduAgent.post("http://acm.hdu.edu.cn/userloginex.php?action=login")
             .set(browser_config)
